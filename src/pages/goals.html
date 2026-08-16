@@ -1,0 +1,47 @@
+<div class="goals-banner card">
+  <div>
+    <h2 style="font-size:1.5rem; font-weight:800; margin-bottom:6px;">Savings Goals & Targets 🎯</h2>
+    <p style="color:var(--text-secondary); max-width:550px;">Set dedicated financial targets for emergency funds, vehicle purchases, tech gear, or travel, and track deposit progress visually.</p>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="Goals.showAddModal()">+ Create New Goal</button>
+  </div>
+  <img src="assets/images/savings_goal_hero.jpg" alt="Savings Visual" class="goals-banner-hero">
+</div>
+
+<!-- Goals Grid -->
+<div id="goals-list" class="goals-grid">
+  <div style="grid-column: span 3; text-align:center; padding:40px; color:var(--text-muted);">Loading savings goals...</div>
+</div>
+
+<!-- Goal Modal -->
+<div class="modal-overlay" id="goal-modal">
+  <div class="modal card">
+    <h3 style="font-size:1.3rem; font-weight:700; margin-bottom:20px;" id="goal-modal-title">Create Savings Goal</h3>
+    <form id="goal-form">
+      <div class="form-group">
+        <label class="form-label" for="goal-title-input">Goal Title</label>
+        <input type="text" id="goal-title-input" class="form-control" placeholder="e.g. Emergency Fund" required>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+        <div class="form-group">
+          <label class="form-label" for="goal-target-input">Target Amount</label>
+          <input type="number" step="0.01" id="goal-target-input" class="form-control" placeholder="100000.00" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="goal-date-input">Target Date</label>
+          <input type="date" id="goal-date-input" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="goal-initial-input">Initial Deposit</label>
+        <input type="number" step="0.01" id="goal-initial-input" class="form-control" placeholder="0.00" value="0">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+        <button type="button" class="btn btn-secondary" onclick="Goals.hideModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Goal</button>
+      </div>
+    </form>
+  </div>
+</div>

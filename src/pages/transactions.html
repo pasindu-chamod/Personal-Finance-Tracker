@@ -1,0 +1,32 @@
+<div class="card" style="margin-bottom:24px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+    <div style="display:flex; gap:12px; flex:1;">
+      <input type="text" id="tx-search-input" class="form-control" placeholder="🔍 Search transactions..." style="max-width:300px;">
+      <select id="tx-type-select" class="form-control" style="max-width:150px;">
+        <option value="">All Types</option>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="App.navigateTo('add-transaction')">+ Add Transaction</button>
+  </div>
+</div>
+
+<div class="card">
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; text-align:left;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:0.85rem;">
+          <th style="padding:14px;">Date</th>
+          <th style="padding:14px;">Category</th>
+          <th style="padding:14px;">Description</th>
+          <th style="padding:14px;">Amount</th>
+          <th style="padding:14px; text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tx-table-body">
+        <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">Loading transactions...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

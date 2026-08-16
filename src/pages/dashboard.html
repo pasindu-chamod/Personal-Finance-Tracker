@@ -1,0 +1,71 @@
+<!-- Header Banner -->
+<div class="dashboard-banner">
+  <div class="dashboard-banner-overlay"></div>
+  <div class="dashboard-banner-text">
+    <h2 class="dashboard-banner-title">Welcome back, <span id="dash-user-name">User</span>! 👋</h2>
+    <p class="dashboard-banner-desc">Here is your financial summary and monthly health score overview.</p>
+  </div>
+</div>
+
+<!-- Summary Grid -->
+<div class="summary-grid">
+  <div class="card summary-card summary-income">
+    <div class="summary-icon">💰</div>
+    <div>
+      <div class="summary-label">Total Income</div>
+      <div class="summary-value" id="dash-total-income">Rs. 0.00</div>
+    </div>
+  </div>
+
+  <div class="card summary-card summary-expense">
+    <div class="summary-icon">💸</div>
+    <div>
+      <div class="summary-label">Total Expense</div>
+      <div class="summary-value" id="dash-total-expense">Rs. 0.00</div>
+    </div>
+  </div>
+
+  <div class="card summary-card summary-balance">
+    <div class="summary-icon">⚖️</div>
+    <div>
+      <div class="summary-label">Net Balance</div>
+      <div class="summary-value" id="dash-net-balance">Rs. 0.00</div>
+    </div>
+  </div>
+
+  <div class="card summary-card summary-score">
+    <div class="summary-icon">⭐</div>
+    <div>
+      <div class="summary-label">Health Score</div>
+      <div class="summary-value" id="dash-health-score" style="color:var(--warning-color);">85/100</div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="charts-grid">
+  <div class="card">
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:18px;">Monthly Income vs Expense Trend</h3>
+    <div style="height:260px; position:relative;">
+      <canvas id="dash-bar-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:18px;">Expense Categories</h3>
+    <div style="height:260px; position:relative;">
+      <canvas id="dash-pie-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+    <h3 style="font-size:1.1rem; font-weight:700;">Recent Transactions</h3>
+    <a href="#" onclick="App.navigateTo('transactions'); return false;" style="font-size:0.9rem; font-weight:600;">View All →</a>
+  </div>
+  <div id="dash-recent-list">
+    <div style="text-align:center; padding:30px; color:var(--text-muted);">Loading transactions...</div>
+  </div>
+</div>

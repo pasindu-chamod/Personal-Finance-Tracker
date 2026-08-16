@@ -1,0 +1,43 @@
+{
+  "name": "smartfinance",
+  "version": "1.0.0",
+  "description": "SmartFinance - Personal Finance Tracker Desktop Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win"
+  },
+  "author": "SmartFinance",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "chart.js": "^4.4.0",
+    "exceljs": "^4.4.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "mysql2": "^3.9.2",
+    "sql.js": "^1.10.0"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.9.0"
+  },
+  "build": {
+    "appId": "com.smartfinance.app",
+    "productName": "SmartFinance",
+    "directories": {
+      "output": "dist"
+    },
+    "extraResources": [
+      {
+        "from": "node_modules/sql.js/dist/sql-wasm.wasm",
+        "to": "sql-wasm.wasm"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

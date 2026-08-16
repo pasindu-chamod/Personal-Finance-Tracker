@@ -1,0 +1,37 @@
+<div class="card" style="max-width:600px; margin:0 auto;">
+  <h3 style="font-size:1.4rem; font-weight:800; margin-bottom:24px;">New Transaction Entry</h3>
+
+  <form id="add-tx-form">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+      <button type="button" class="btn btn-primary" id="btn-type-expense" style="width:100%;" onclick="Transactions.setType('expense')">💸 Expense</button>
+      <button type="button" class="btn btn-secondary" id="btn-type-income" style="width:100%;" onclick="Transactions.setType('income')">💰 Income</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="tx-amount">Amount</label>
+      <input type="number" step="0.01" id="tx-amount" class="form-control" placeholder="0.00" required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="tx-category">Category</label>
+      <select id="tx-category" class="form-control" required>
+        <option value="">Select Category...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="tx-date">Date</label>
+      <input type="date" id="tx-date" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="tx-description">Description / Notes</label>
+      <input type="text" id="tx-description" class="form-control" placeholder="e.g. Weekly Grocery Shopping">
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:28px;">
+      <button type="button" class="btn btn-secondary" onclick="App.navigateTo('transactions')">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save Transaction</button>
+    </div>
+  </form>
+</div>

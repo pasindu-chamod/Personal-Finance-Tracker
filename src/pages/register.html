@@ -1,0 +1,64 @@
+<div class="auth-split-container">
+  <!-- Left Side: Hero Section -->
+  <div class="auth-hero-side">
+    <div class="auth-hero-overlay"></div>
+    <div class="auth-hero-content">
+      <h1 class="auth-hero-title">Start Your Path to Wealth Growth</h1>
+      <p class="auth-hero-subtitle">Track income, categorize expenses, set savings targets, and generate instant reports.</p>
+    </div>
+  </div>
+
+  <!-- Right Side: Registration Form -->
+  <div class="auth-form-side">
+    <div class="auth-card card" style="max-width:480px;">
+      <h3 class="auth-title">Create Account</h3>
+      <p class="auth-subtitle">Fill in details to set up your personal finance tracker</p>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label" for="reg-fullname">Full Name</label>
+          <input type="text" id="reg-fullname" class="form-control" placeholder="Enter full name" required>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="reg-username">Username</label>
+            <input type="text" id="reg-username" class="form-control" placeholder="Enter username" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-currency">Currency</label>
+            <select id="reg-currency" class="form-control">
+              <option value="LKR">LKR (Rs.)</option>
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="INR">INR (₹)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="user@example.com">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password</label>
+            <input type="password" id="reg-password" class="form-control" placeholder="••••••••" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-confirm-password">Confirm Password</label>
+            <input type="password" id="reg-confirm-password" class="form-control" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; margin-top:8px;">Register Account</button>
+      </form>
+
+      <div style="margin-top:24px; text-align:center; font-size:0.9rem; color:var(--text-secondary);">
+        Already have an account? <a href="#" id="to-login-link" style="font-weight:600;">Sign In</a>
+      </div>
+    </div>
+  </div>
+</div>

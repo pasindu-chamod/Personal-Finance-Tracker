@@ -4,28 +4,37 @@ const Dashboard = {
 
   async init() {
     const user = Utils.getCurrentUser();
+    if (!user) return;
+
     const displayName = Utils.getUserDisplayName(user);
     const dashUserElem = document.getElementById('dash-user-name');
-    if (dashUserElem) {
-      dashUserElem.textContent = displayName;
-    }
+    if (dashUserElem) dashUserElem.textContent = displayName;
 
     const now = new Date();
-    if (user) {
-      await this.loadData(user.id, now.getMonth() + 1, now.getFullYear());
-    }
+    await this.loadData(Number(user.id), now.getMonth() + 1, now.getFullYear());
   },
 
   async loadData(userId, month, year) {
     try {
       const currency = Utils.getCurrency();
-      const summary = await window.api.transactions.getSummary(userId, month, year);
 
-      Utils.animateNumber(document.getElementById('dash-total-income'), 0, summary.totalIncome, 800, (v) => Utils.formatCurrency(v, currency));
-      Utils.animateNumber(document.getElementById('dash-total-expense'), 0, summary.totalExpense, 800, (v) => Utils.formatCurrency(v, currency));
-      Utils.animateNumber(document.getElementById('dash-net-balance'), 0, summary.balance, 800, (v) => Utils.formatCurrency(v, currency));
+      // --- Summary Cards ---
+      let summary = { totalIncome: 0, totalExpense: 0, balance: 0 };
+      try {
+        summary = await window.api.transactions.getSummary(userId, month, year);
+        if (!summary) summary = { totalIncome: 0, totalExpense: 0, balance: 0 };
+      } catch (e) { console.error('getSummary error:', e); }
 
-      // Financial Health Score Calculation
+      const incomeEl = document.getElementById('dash-total-income');
+      const expenseEl = document.getElementById('dash-total-expense');
+      const balanceEl = document.getElementById('dash-net-balance');
+      const scoreEl = document.getElementById('dash-health-score');
+
+      if (incomeEl) Utils.animateNumber(incomeEl, 0, summary.totalIncome || 0, 800, (v) => Utils.formatCurrency(v, currency));
+      if (expenseEl) Utils.animateNumber(expenseEl, 0, summary.totalExpense || 0, 800, (v) => Utils.formatCurrency(v, currency));
+      if (balanceEl) Utils.animateNumber(balanceEl, 0, summary.balance || 0, 800, (v) => Utils.formatCurrency(v, currency));
+
+      // --- Financial Health Score ---
       let score = 50;
       if (summary.totalIncome > 0) {
         const savingsRatio = (summary.balance / summary.totalIncome) * 100;
@@ -35,28 +44,43 @@ const Dashboard = {
         else if (savingsRatio > 0) score = 60;
         else score = 40;
       }
-      document.getElementById('dash-health-score').textContent = `${Math.max(10, Math.min(100, Math.round(score)))}/100`;
+      if (scoreEl) scoreEl.textContent = `${Math.max(10, Math.min(100, Math.round(score)))}/100`;
 
-      // Render Charts
-      const monthlyData = await window.api.reports.monthlyTotals(userId, year);
+      // --- Bar Chart ---
+      let monthlyData = [];
+      try {
+        monthlyData = await window.api.reports.monthlyTotals(userId, year);
+        if (!Array.isArray(monthlyData)) monthlyData = [];
+      } catch (e) { console.error('monthlyTotals error:', e); }
       this.renderBarChart(monthlyData);
 
-      const startDate = `${year}-${String(month).padStart(2,'0')}-01`;
-      const endDate = Utils.lastDayOfMonth();
-      const categoryData = await window.api.reports.categoryBreakdown(userId, startDate, endDate, 'expense');
+      // --- Pie / Doughnut Chart ---
+      let categoryData = [];
+      try {
+        const startDate = `${year}-${String(month).padStart(2,'0')}-01`;
+        const endDate = Utils.lastDayOfMonth(year, month);
+        categoryData = await window.api.reports.categoryBreakdown(userId, startDate, endDate, 'expense');
+        if (!Array.isArray(categoryData)) categoryData = [];
+      } catch (e) { console.error('categoryBreakdown error:', e); }
       this.renderPieChart(categoryData);
 
-      // Render Recent List
-      const { transactions } = await window.api.transactions.getAll(userId, { page: 1, limit: 5 });
+      // --- Recent Transactions ---
+      let transactions = [];
+      try {
+        const res = await window.api.transactions.getAll(userId, { page: 1, limit: 5 });
+        transactions = res ? (res.transactions || res) : [];
+        if (!Array.isArray(transactions)) transactions = [];
+      } catch (e) { console.error('getAll recent error:', e); }
       this.renderRecent(transactions, currency);
 
     } catch (err) {
-      console.error(err);
+      console.error('Dashboard loadData error:', err);
     }
   },
 
   renderBarChart(data) {
-    if (this.barChart) this.barChart.destroy();
+    if (typeof Chart === 'undefined') return;
+    if (this.barChart) { this.barChart.destroy(); this.barChart = null; }
     const ctx = document.getElementById('dash-bar-chart');
     if (!ctx) return;
 
@@ -64,13 +88,15 @@ const Dashboard = {
     const incomeData = new Array(12).fill(0);
     const expenseData = new Array(12).fill(0);
 
-    data.forEach(item => {
-      const idx = parseInt(item.month, 10) - 1;
-      if (idx >= 0 && idx < 12) {
-        if (item.type === 'income') incomeData[idx] = item.total;
-        if (item.type === 'expense') expenseData[idx] = item.total;
-      }
-    });
+    if (Array.isArray(data)) {
+      data.forEach(item => {
+        const idx = parseInt(item.month, 10) - 1;
+        if (idx >= 0 && idx < 12) {
+          if (item.type === 'income') incomeData[idx] = Number(item.total) || 0;
+          if (item.type === 'expense') expenseData[idx] = Number(item.total) || 0;
+        }
+      });
+    }
 
     this.barChart = new Chart(ctx, {
       type: 'bar',
@@ -94,22 +120,24 @@ const Dashboard = {
   },
 
   renderPieChart(data) {
-    if (this.pieChart) this.pieChart.destroy();
+    if (typeof Chart === 'undefined') return;
+    if (this.pieChart) { this.pieChart.destroy(); this.pieChart = null; }
     const ctx = document.getElementById('dash-pie-chart');
     if (!ctx) return;
 
     if (!data || data.length === 0) {
-      ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+      const context = ctx.getContext('2d');
+      if (context) context.clearRect(0, 0, ctx.width, ctx.height);
       return;
     }
 
     this.pieChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: data.map(d => d.categoryName),
+        labels: data.map(d => d.categoryName || d.category_name || 'Other'),
         datasets: [{
-          data: data.map(d => d.total),
-          backgroundColor: data.map(d => d.categoryColor || '#6366f1'),
+          data: data.map(d => Number(d.total) || 0),
+          backgroundColor: data.map(d => d.categoryColor || d.category_color || '#6366f1'),
           borderWidth: 0
         }]
       },
@@ -126,7 +154,7 @@ const Dashboard = {
     const list = document.getElementById('dash-recent-list');
     if (!list) return;
 
-    if (!transactions || transactions.length === 0) {
+    if (!Array.isArray(transactions) || transactions.length === 0) {
       list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">No recent transactions found</div>`;
       return;
     }
@@ -149,3 +177,5 @@ const Dashboard = {
     `).join('');
   }
 };
+
+window.Dashboard = Dashboard;

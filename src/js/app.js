@@ -38,8 +38,11 @@ const App = {
   showAppLayout(user) {
     document.getElementById('auth-layout').style.display = 'none';
     document.getElementById('app-layout').style.display = 'grid';
-    document.getElementById('user-name').textContent = user.full_name || user.username;
-    document.getElementById('user-avatar').textContent = (user.full_name || user.username).charAt(0).toUpperCase();
+    const displayName = Utils.getUserDisplayName(user);
+    const userElem = document.getElementById('user-name');
+    if (userElem) userElem.textContent = displayName;
+    const avatarElem = document.getElementById('user-avatar');
+    if (avatarElem) avatarElem.textContent = displayName.charAt(0).toUpperCase();
   },
 
   async navigateTo(page) {

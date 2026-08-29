@@ -5,8 +5,8 @@ const Transactions = {
     await this.loadTransactions();
     const search = document.getElementById('tx-search-input');
     const type = document.getElementById('tx-type-select');
-    if (search) search.addEventListener('input', Utils.debounce(() => this.loadTransactions(), 300));
-    if (type) type.addEventListener('change', () => this.loadTransactions());
+    if (search) search.oninput = Utils.debounce(() => this.loadTransactions(), 300);
+    if (type) type.onchange = () => this.loadTransactions();
   },
 
   async loadTransactions() {
@@ -18,10 +18,11 @@ const Transactions = {
     const currency = Utils.getCurrency();
 
     try {
-      const { transactions } = await window.api.transactions.getAll(user.id, { search, type, limit: 100 });
+      const res = await window.api.transactions.getAll(user.id, { search, type, limit: 200 });
+      const transactions = res ? (res.transactions || res) : [];
       this.renderTable(transactions, currency);
     } catch (err) {
-      console.error(err);
+      console.error('loadTransactions error:', err);
     }
   },
 
@@ -29,8 +30,8 @@ const Transactions = {
     const tbody = document.getElementById('tx-table-body');
     if (!tbody) return;
 
-    if (!transactions || transactions.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No transactions recorded</td></tr>`;
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No transactions recorded yet</td></tr>`;
       return;
     }
 
@@ -40,7 +41,7 @@ const Transactions = {
         <td style="padding:14px;">
           <span style="display:inline-flex; align-items:center; gap:8px;">
             <span>${t.category_icon || '💵'}</span>
-            <span>${t.category_name || 'General'}</span>
+            <span style="font-weight:500;">${t.category_name || 'General'}</span>
           </span>
         </td>
         <td style="padding:14px;">${t.description || '-'}</td>
@@ -48,7 +49,7 @@ const Transactions = {
           ${t.type === 'income' ? '+' : '-'}${Utils.formatCurrency(t.amount, currency)}
         </td>
         <td style="padding:14px; text-align:right;">
-          <button class="btn btn-ghost" style="color:var(--expense-color);" onclick="Transactions.deleteTx(${t.id})">🗑️</button>
+          <button class="btn btn-ghost" style="color:var(--expense-color);" onclick="Transactions.deleteTx(${t.id})">🗑️ Delete</button>
         </td>
       </tr>
     `).join('');
@@ -58,10 +59,15 @@ const Transactions = {
     const user = Utils.getCurrentUser();
     if (!user) return;
 
-    document.getElementById('tx-date').value = Utils.today();
+    const dateElem = document.getElementById('tx-date');
+    if (dateElem) dateElem.value = Utils.today();
+
     await this.loadCategoriesSelect(user.id, this.currentType);
 
-    document.getElementById('add-tx-form').addEventListener('submit', (e) => this.handleCreate(e));
+    const form = document.getElementById('add-tx-form');
+    if (form) {
+      form.onsubmit = (e) => this.handleCreate(e);
+    }
   },
 
   setType(type) {
@@ -69,12 +75,14 @@ const Transactions = {
     const btnExp = document.getElementById('btn-type-expense');
     const btnInc = document.getElementById('btn-type-income');
 
-    if (type === 'expense') {
-      btnExp.className = 'btn btn-primary';
-      btnInc.className = 'btn btn-secondary';
-    } else {
-      btnExp.className = 'btn btn-secondary';
-      btnInc.className = 'btn btn-primary';
+    if (btnExp && btnInc) {
+      if (type === 'expense') {
+        btnExp.className = 'btn btn-primary';
+        btnInc.className = 'btn btn-secondary';
+      } else {
+        btnExp.className = 'btn btn-secondary';
+        btnInc.className = 'btn btn-primary';
+      }
     }
 
     const user = Utils.getCurrentUser();
@@ -87,42 +95,62 @@ const Transactions = {
 
     try {
       const categories = await window.api.categories.getByType(userId, type);
-      select.innerHTML = '<option value="">Select Category...</option>' + categories.map(c => `
-        <option value="${c.id}">${c.icon || ''} ${c.name}</option>
-      `).join('');
+      if (categories && categories.length > 0) {
+        select.innerHTML = categories.map((c, idx) => `
+          <option value="${c.id}" ${idx === 0 ? 'selected' : ''}>${c.icon || ''} ${c.name}</option>
+        `).join('');
+      } else {
+        select.innerHTML = '<option value="">No Categories Found</option>';
+      }
     } catch (err) {
-      console.error(err);
+      console.error('loadCategoriesSelect error:', err);
     }
   },
 
   async handleCreate(e) {
     e.preventDefault();
     const user = Utils.getCurrentUser();
-    if (!user) return;
-
-    const amount = parseFloat(document.getElementById('tx-amount').value);
-    const categoryId = parseInt(document.getElementById('tx-category').value, 10);
-    const date = document.getElementById('tx-date').value;
-    const description = document.getElementById('tx-description').value.trim();
-
-    if (!amount || !categoryId || !date) {
-      Toast.show('Please fill in required transaction fields', 'error');
+    if (!user) {
+      Toast.show('User session not found. Please log in.', 'error');
       return;
+    }
+
+    const amountInput = document.getElementById('tx-amount');
+    const amount = parseFloat(amountInput ? amountInput.value : '0');
+    let categoryId = parseInt(document.getElementById('tx-category')?.value, 10);
+    const date = document.getElementById('tx-date')?.value || Utils.today();
+    const description = document.getElementById('tx-description')?.value.trim() || '';
+
+    if (isNaN(amount) || amount <= 0) {
+      Toast.show('Please enter a valid amount greater than 0', 'error');
+      return;
+    }
+
+    if (isNaN(categoryId)) {
+      const categories = await window.api.categories.getByType(user.id, this.currentType);
+      if (categories && categories.length > 0) {
+        categoryId = categories[0].id;
+      } else {
+        Toast.show('Please select or create a category first', 'error');
+        return;
+      }
     }
 
     try {
       await window.api.transactions.create({
-        userId: user.id,
-        categoryId,
+        userId: Number(user.id),
+        categoryId: Number(categoryId),
         type: this.currentType,
-        amount,
+        amount: Number(amount),
         description,
         date
       });
+
       Toast.show('Transaction saved successfully!', 'success');
       App.navigateTo('transactions');
     } catch (err) {
-      Toast.show(err.message || 'Save transaction failed', 'error');
+      console.error('handleCreate transaction error:', err);
+      Toast.show(err.message || 'Failed to save transaction', 'error');
     }
   },
 

@@ -35,7 +35,7 @@ module.exports = {
       [username, password, fullName, email, currency || 'LKR']
     );
     const result = db.exec('SELECT last_insert_rowid() as id');
-    return result[0].values[0][0];
+    return result && result[0] && result[0].values ? result[0].values[0][0] : 1;
   },
 
   async getUserByUsername(db, username) {
@@ -87,16 +87,16 @@ module.exports = {
     if (getIsMysqlActive()) {
       const [res] = await getPool().execute(
         'INSERT INTO transactions (user_id, category_id, type, amount, description, date) VALUES (?, ?, ?, ?, ?, ?)',
-        [userId, categoryId, type, amount, description, date]
+        [userId, categoryId, type, amount, description || '', date]
       );
       return res.insertId;
     }
     db.run(
       'INSERT INTO transactions (user_id, category_id, type, amount, description, date) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, categoryId, type, amount, description, date]
+      [userId, categoryId, type, amount, description || '', date]
     );
     const result = db.exec('SELECT last_insert_rowid() as id');
-    return result[0].values[0][0];
+    return result && result[0] && result[0].values ? result[0].values[0][0] : 1;
   },
 
   async getTransactions(db, { userId, type, categoryId, startDate, endDate, search, page = 1, limit = 50 }) {
@@ -147,15 +147,14 @@ module.exports = {
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    const countResult = db.exec(`SELECT COUNT(*) as total FROM (${query})`, params);
-    const total = countResult.length > 0 ? countResult[0].values[0][0] : 0;
-    const totalPages = Math.ceil(total / limit);
-
-    query += ` ORDER BY t.date DESC, t.id DESC LIMIT ? OFFSET ?`;
-    params.push(limit, (page - 1) * limit);
-
+    query += ` ORDER BY t.date DESC, t.id DESC`;
     const result = db.exec(query, params);
-    const transactions = resultToObjects(result);
+    const allTransactions = resultToObjects(result);
+    const total = allTransactions.length;
+    const totalPages = Math.ceil(total / limit);
+    const offset = (page - 1) * limit;
+    const transactions = allTransactions.slice(offset, offset + limit);
+
     return { transactions, total, page, totalPages };
   },
 
@@ -224,6 +223,23 @@ module.exports = {
       if (row.type === 'expense') totalExpense = Number(row.total);
     });
 
+    // Fallback: If specified month has no transactions, compute all-time totals so dashboard is informative
+    if (totalIncome === 0 && totalExpense === 0 && month && year) {
+      const allTimeQuery = `SELECT type, SUM(amount) as total FROM transactions WHERE user_id = ? GROUP BY type`;
+      let allRows = [];
+      if (getIsMysqlActive()) {
+        const [sqlRows] = await getPool().execute(allTimeQuery, [userId]);
+        allRows = sqlRows;
+      } else {
+        const result = db.exec(allTimeQuery, [userId]);
+        allRows = resultToObjects(result);
+      }
+      allRows.forEach(row => {
+        if (row.type === 'income') totalIncome = Number(row.total);
+        if (row.type === 'expense') totalExpense = Number(row.total);
+      });
+    }
+
     return {
       totalIncome,
       totalExpense,
@@ -275,7 +291,7 @@ module.exports = {
       [userId, name, type, icon, color]
     );
     const result = db.exec('SELECT last_insert_rowid() as id');
-    return result[0].values[0][0];
+    return result && result[0] && result[0].values ? result[0].values[0][0] : 1;
   },
 
   async updateCategory(db, { id, name, icon, color }) {
@@ -311,7 +327,7 @@ module.exports = {
       [userId, categoryId, amount, month]
     );
     const result = db.exec('SELECT last_insert_rowid() as id');
-    return result[0].values[0][0];
+    return result && result[0] && result[0].values ? result[0].values[0][0] : 1;
   },
 
   async getBudgets(db, { userId, month }) {
@@ -348,7 +364,7 @@ module.exports = {
     db.run('DELETE FROM budgets WHERE id = ?', [id]);
   },
 
-  // Savings Goals Queries (NEW FEATURE)
+  // Savings Goals Queries
   async createGoal(db, { userId, title, targetAmount, savedAmount, targetDate, category }) {
     if (getIsMysqlActive()) {
       const [res] = await getPool().execute(
@@ -362,7 +378,7 @@ module.exports = {
       [userId, title, targetAmount, savedAmount || 0, targetDate, category || 'General']
     );
     const result = db.exec('SELECT last_insert_rowid() as id');
-    return result[0].values[0][0];
+    return result && result[0] && result[0].values ? result[0].values[0][0] : 1;
   },
 
   async getGoals(db, userId) {

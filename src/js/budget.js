@@ -1,7 +1,10 @@
 const Budget = {
   async init() {
     await this.loadBudgets();
-    document.getElementById('budget-form').addEventListener('submit', (e) => this.handleSave(e));
+    const form = document.getElementById('budget-form');
+    if (form) {
+      form.onsubmit = (e) => this.handleSave(e);
+    }
   },
 
   async loadBudgets() {
@@ -25,7 +28,7 @@ const Budget = {
 
     const currency = Utils.getCurrency();
 
-    if (!budgets || budgets.length === 0) {
+    if (!Array.isArray(budgets) || budgets.length === 0) {
       list.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--text-muted);" class="card">No monthly budget limits set yet.</div>`;
       return;
     }
@@ -59,13 +62,15 @@ const Budget = {
 
     const categories = await window.api.categories.getByType(user.id, 'expense');
     const select = document.getElementById('budget-cat');
-    select.innerHTML = categories.map(c => `<option value="${c.id}">${c.icon || ''} ${c.name}</option>`).join('');
+    if (select) {
+      select.innerHTML = categories.map(c => `<option value="${c.id}">${c.icon || ''} ${c.name}</option>`).join('');
+    }
 
-    document.getElementById('budget-modal').classList.add('active');
+    document.getElementById('budget-modal')?.classList.add('active');
   },
 
   hideModal() {
-    document.getElementById('budget-modal').classList.remove('active');
+    document.getElementById('budget-modal')?.classList.remove('active');
   },
 
   async handleSave(e) {
@@ -73,8 +78,8 @@ const Budget = {
     const user = Utils.getCurrentUser();
     if (!user) return;
 
-    const categoryId = parseInt(document.getElementById('budget-cat').value, 10);
-    const amount = parseFloat(document.getElementById('budget-amount').value);
+    const categoryId = parseInt(document.getElementById('budget-cat')?.value, 10);
+    const amount = parseFloat(document.getElementById('budget-amount')?.value);
 
     const d = new Date();
     const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -83,9 +88,9 @@ const Budget = {
 
     try {
       await window.api.budget.create({
-        userId: user.id,
-        categoryId,
-        amount,
+        userId: Number(user.id),
+        categoryId: Number(categoryId),
+        amount: Number(amount),
         month
       });
       Toast.show('Budget limit saved!', 'success');

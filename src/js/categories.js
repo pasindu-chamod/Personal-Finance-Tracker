@@ -1,7 +1,10 @@
 const Categories = {
   async init() {
     await this.loadCategories();
-    document.getElementById('category-form').addEventListener('submit', (e) => this.handleSave(e));
+    const form = document.getElementById('category-form');
+    if (form) {
+      form.onsubmit = (e) => this.handleSave(e);
+    }
   },
 
   async loadCategories() {
@@ -20,6 +23,11 @@ const Categories = {
     const grid = document.getElementById('categories-grid');
     if (!grid) return;
 
+    if (!Array.isArray(categories) || categories.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:30px; color:var(--text-muted);" class="card">No categories found</div>`;
+      return;
+    }
+
     grid.innerHTML = categories.map(c => `
       <div class="card" style="display:flex; align-items:center; gap:16px; border-left:4px solid ${c.color || '#6366f1'};">
         <div style="font-size:2rem;">${c.icon || '📦'}</div>
@@ -32,12 +40,13 @@ const Categories = {
   },
 
   showAddModal() {
-    document.getElementById('category-form').reset();
-    document.getElementById('category-modal').classList.add('active');
+    const form = document.getElementById('category-form');
+    if (form) form.reset();
+    document.getElementById('category-modal')?.classList.add('active');
   },
 
   hideModal() {
-    document.getElementById('category-modal').classList.remove('active');
+    document.getElementById('category-modal')?.classList.remove('active');
   },
 
   async handleSave(e) {
@@ -45,15 +54,15 @@ const Categories = {
     const user = Utils.getCurrentUser();
     if (!user) return;
 
-    const name = document.getElementById('cat-name').value.trim();
-    const type = document.getElementById('cat-type').value;
-    const icon = document.getElementById('cat-icon').value.trim() || '📦';
+    const name = document.getElementById('cat-name')?.value.trim() || '';
+    const type = document.getElementById('cat-type')?.value || 'expense';
+    const icon = document.getElementById('cat-icon')?.value.trim() || '📦';
 
     if (!name) return;
 
     try {
       await window.api.categories.create({
-        userId: user.id,
+        userId: Number(user.id),
         name,
         type,
         icon,

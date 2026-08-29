@@ -101,39 +101,69 @@ function setupIpcHandlers() {
 
   // Transaction Channels
   ipcMain.handle('transactions:create', async (event, data) => {
-    const db = getDb();
-    const result = await queries.createTransaction(db, data);
-    saveDatabase();
-    return result;
+    try {
+      const db = getDb();
+      const result = await queries.createTransaction(db, data);
+      saveDatabase();
+      return result;
+    } catch (error) {
+      console.error('IPC transactions:create error:', error);
+      throw error;
+    }
   });
 
   ipcMain.handle('transactions:getAll', async (event, { userId, filters }) => {
-    const db = getDb();
-    return await queries.getTransactions(db, { userId, ...filters });
+    try {
+      const db = getDb();
+      return await queries.getTransactions(db, { userId, ...filters });
+    } catch (error) {
+      console.error('IPC transactions:getAll error:', error);
+      throw error;
+    }
   });
 
   ipcMain.handle('transactions:getById', async (event, { id }) => {
-    const db = getDb();
-    return await queries.getTransactionById(db, id);
+    try {
+      const db = getDb();
+      return await queries.getTransactionById(db, id);
+    } catch (error) {
+      console.error('IPC transactions:getById error:', error);
+      throw error;
+    }
   });
 
   ipcMain.handle('transactions:update', async (event, data) => {
-    const db = getDb();
-    const result = await queries.updateTransaction(db, data);
-    saveDatabase();
-    return result;
+    try {
+      const db = getDb();
+      const result = await queries.updateTransaction(db, data);
+      saveDatabase();
+      return result;
+    } catch (error) {
+      console.error('IPC transactions:update error:', error);
+      throw error;
+    }
   });
 
   ipcMain.handle('transactions:delete', async (event, { id }) => {
-    const db = getDb();
-    await queries.deleteTransaction(db, id);
-    saveDatabase();
-    return true;
+    try {
+      const db = getDb();
+      await queries.deleteTransaction(db, id);
+      saveDatabase();
+      return true;
+    } catch (error) {
+      console.error('IPC transactions:delete error:', error);
+      throw error;
+    }
   });
 
   ipcMain.handle('transactions:getSummary', async (event, { userId, month, year }) => {
-    const db = getDb();
-    return await queries.getTransactionSummary(db, { userId, month, year });
+    try {
+      const db = getDb();
+      return await queries.getTransactionSummary(db, { userId, month, year });
+    } catch (error) {
+      console.error('IPC transactions:getSummary error:', error);
+      throw error;
+    }
   });
 
   // Category Channels

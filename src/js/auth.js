@@ -47,7 +47,7 @@ const Auth = {
         Utils.setCurrentUser(user);
         App.showAppLayout(user);
         App.navigateTo('dashboard');
-        Toast.show(`Welcome back, ${user.full_name || user.username}!`, 'success');
+        Toast.show(`Welcome back, ${Utils.getUserDisplayName(user)}!`, 'success');
       } else {
         Toast.show('Invalid username or password', 'error');
       }

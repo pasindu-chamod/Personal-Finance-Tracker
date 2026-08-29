@@ -101,3 +101,5 @@ const Budget = {
     }
   }
 };
+
+window.Budget = Budget;

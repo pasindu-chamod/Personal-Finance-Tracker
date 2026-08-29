@@ -28,10 +28,12 @@ const Utils = {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
   },
 
-  lastDayOfMonth() {
+  lastDayOfMonth(year, month) {
     const d = new Date();
-    const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    const y = year || d.getFullYear();
+    const m = month || (d.getMonth() + 1);
+    const lastDay = new Date(y, m, 0).getDate();
+    return `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   },
 
   animateNumber(element, start, end, duration = 800, formatter = null) {
@@ -51,7 +53,10 @@ const Utils = {
 
   getCurrentUser() {
     try {
-      return JSON.parse(sessionStorage.getItem('currentUser'));
+      const userStr = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+      if (!userStr) return null;
+      const user = JSON.parse(userStr);
+      return (user && user.id) ? user : null;
     } catch (e) {
       return null;
     }
@@ -63,6 +68,7 @@ const Utils = {
       user.full_name = displayName;
       user.fullName = displayName;
     }
+    localStorage.setItem('currentUser', JSON.stringify(user));
     sessionStorage.setItem('currentUser', JSON.stringify(user));
   },
 
@@ -72,6 +78,7 @@ const Utils = {
   },
 
   clearCurrentUser() {
+    localStorage.removeItem('currentUser');
     sessionStorage.removeItem('currentUser');
   },
 
@@ -107,3 +114,46 @@ const Utils = {
     });
   }
 };
+
+window.Utils = Utils;
+
+// Toast notification utility
+const Toast = {
+  show(message, type = 'info', duration = 3500) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const colors = {
+      success: '#10b981',
+      error: '#ef4444',
+      info: '#6366f1',
+      warning: '#f59e0b'
+    };
+
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      background: ${colors[type] || colors.info};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      margin-bottom: 8px;
+      animation: slideIn 0.3s ease;
+      max-width: 320px;
+      word-break: break-word;
+    `;
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+};
+
+window.Toast = Toast;
+

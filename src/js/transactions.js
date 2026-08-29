@@ -167,3 +167,5 @@ const Transactions = {
     }
   }
 };
+
+window.Transactions = Transactions;

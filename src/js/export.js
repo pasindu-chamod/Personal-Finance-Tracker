@@ -29,3 +29,5 @@ const Export = {
     }
   }
 };
+
+window.Export = Export;

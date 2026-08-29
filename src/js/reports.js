@@ -52,3 +52,5 @@ const Reports = {
     });
   }
 };
+
+window.Reports = Reports;

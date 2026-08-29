@@ -18,7 +18,7 @@
       <h3 class="auth-title">Welcome Back</h3>
       <p class="auth-subtitle">Enter your credentials to access your financial dashboard</p>
 
-      <form id="login-form">
+      <form id="login-form" onsubmit="Auth.handleLogin(event); return false;">
         <div class="form-group">
           <label class="form-label" for="login-username">Username</label>
           <input type="text" id="login-username" class="form-control" placeholder="Enter username" required>
@@ -33,7 +33,7 @@
       </form>
 
       <div style="margin-top:24px; text-align:center; font-size:0.9rem; color:var(--text-secondary);">
-        Don't have an account? <a href="#" id="to-register-link" style="font-weight:600;">Create Account</a>
+        Don't have an account? <a href="#" id="to-register-link" onclick="Auth.showRegister(); return false;" style="font-weight:600;">Create Account</a>
       </div>
     </div>
   </div>

@@ -14,7 +14,7 @@
       <h3 class="auth-title">Create Account</h3>
       <p class="auth-subtitle">Fill in details to set up your personal finance tracker</p>
 
-      <form id="register-form">
+      <form id="register-form" onsubmit="Auth.handleRegister(event); return false;">
         <div class="form-group">
           <label class="form-label" for="reg-fullname">Full Name</label>
           <input type="text" id="reg-fullname" class="form-control" placeholder="Enter full name" required>
@@ -57,7 +57,7 @@
       </form>
 
       <div style="margin-top:24px; text-align:center; font-size:0.9rem; color:var(--text-secondary);">
-        Already have an account? <a href="#" id="to-login-link" style="font-weight:600;">Sign In</a>
+        Already have an account? <a href="#" id="to-login-link" onclick="Auth.showLogin(); return false;" style="font-weight:600;">Sign In</a>
       </div>
     </div>
   </div>

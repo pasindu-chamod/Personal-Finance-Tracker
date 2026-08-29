@@ -58,5 +58,6 @@ contextBridge.exposeInMainWorld('api', {
   file: {
     write: (filePath, data) => ipcRenderer.invoke('file:write', { filePath, data }),
     writeBuffer: (filePath, data) => ipcRenderer.invoke('file:writeBuffer', { filePath, data })
-  }
+  },
+  loadTemplate: (pageName) => ipcRenderer.invoke('app:loadTemplate', pageName)
 });

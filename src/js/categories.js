@@ -76,3 +76,5 @@ const Categories = {
     }
   }
 };
+
+window.Categories = Categories;

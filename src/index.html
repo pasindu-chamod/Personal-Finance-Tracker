@@ -13,7 +13,45 @@
 <body>
   <!-- Auth Layout -->
   <div id="auth-layout" class="auth-layout">
-    <div id="auth-content" style="width:100%; height:100%;"></div>
+    <div id="auth-content" style="width:100%; height:100%;">
+      <div class="auth-split-container">
+        <div class="auth-hero-side">
+          <div class="auth-hero-overlay"></div>
+          <div class="auth-hero-content">
+            <h1 class="auth-hero-title">Take Control of Your Personal Finances</h1>
+            <p class="auth-hero-subtitle">SmartFinance gives you 100% offline control, intelligent savings tracking, and financial analytics.</p>
+          </div>
+        </div>
+        <div class="auth-form-side">
+          <div class="auth-card card">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
+              <span style="font-size:2rem;">💰</span>
+              <h2 style="font-size:1.6rem; font-weight:800; background:var(--accent-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">SmartFinance</h2>
+            </div>
+            <h3 class="auth-title">Welcome Back</h3>
+            <p class="auth-subtitle">Enter your credentials to access your financial dashboard</p>
+
+            <form id="login-form" onsubmit="Auth.handleLogin(event); return false;">
+              <div class="form-group">
+                <label class="form-label" for="login-username">Username</label>
+                <input type="text" id="login-username" class="form-control" placeholder="Enter username" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="login-password">Password</label>
+                <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; margin-top:8px;">Sign In</button>
+            </form>
+
+            <div style="margin-top:24px; text-align:center; font-size:0.9rem; color:var(--text-secondary);">
+              Don't have an account? <a href="#" id="to-register-link" onclick="Auth.showRegister(); return false;" style="font-weight:600;">Create Account</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- App Layout -->
@@ -80,7 +118,76 @@
         </div>
       </header>
 
-      <div class="page-content" id="page-content"></div>
+      <div class="page-content" id="page-content">
+        <!-- Default Dashboard HTML Pre-embedded -->
+        <div class="dashboard-banner">
+          <div class="dashboard-banner-overlay"></div>
+          <div class="dashboard-banner-text">
+            <h2 class="dashboard-banner-title">Welcome back, <span id="dash-user-name"></span>! 👋</h2>
+            <p class="dashboard-banner-desc">Here is your financial summary and monthly health score overview.</p>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card summary-card summary-income">
+            <div class="summary-icon">💰</div>
+            <div>
+              <div class="summary-label">Total Income</div>
+              <div class="summary-value" id="dash-total-income">Rs. 0.00</div>
+            </div>
+          </div>
+
+          <div class="card summary-card summary-expense">
+            <div class="summary-icon">💸</div>
+            <div>
+              <div class="summary-label">Total Expense</div>
+              <div class="summary-value" id="dash-total-expense">Rs. 0.00</div>
+            </div>
+          </div>
+
+          <div class="card summary-card summary-balance">
+            <div class="summary-icon">⚖️</div>
+            <div>
+              <div class="summary-label">Net Balance</div>
+              <div class="summary-value" id="dash-net-balance">Rs. 0.00</div>
+            </div>
+          </div>
+
+          <div class="card summary-card summary-score">
+            <div class="summary-icon">⭐</div>
+            <div>
+              <div class="summary-label">Health Score</div>
+              <div class="summary-value" id="dash-health-score" style="color:var(--warning-color);">85/100</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="card">
+            <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:18px;">Monthly Income vs Expense Trend</h3>
+            <div style="height:260px; position:relative;">
+              <canvas id="dash-bar-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:18px;">Expense Categories</h3>
+            <div style="height:260px; position:relative;">
+              <canvas id="dash-pie-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <h3 style="font-size:1.1rem; font-weight:700;">Recent Transactions</h3>
+            <a href="#" onclick="App.navigateTo('transactions'); return false;" style="font-size:0.9rem; font-weight:600;">View All →</a>
+          </div>
+          <div id="dash-recent-list">
+            <div style="text-align:center; padding:30px; color:var(--text-muted);">Loading transactions...</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -88,7 +195,7 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="../node_modules/chart.js/dist/chart.umd.js"></script>
+  <script src="js/vendor/chart.umd.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/dashboard.js"></script>

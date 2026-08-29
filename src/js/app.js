@@ -1,3 +1,18 @@
+window.onerror = function(message, source, lineno, colno, error) {
+  if (window.Toast) {
+    Toast.show(`JS Error: ${message} (Line ${lineno})`, 'error', 6000);
+  }
+  console.error(error);
+  return false;
+};
+
+window.onunhandledrejection = function(event) {
+  if (window.Toast) {
+    Toast.show(`Promise Fail: ${event.reason?.message || event.reason}`, 'error', 6000);
+  }
+  console.error(event.reason);
+};
+
 const App = {
   currentPage: 'dashboard',
 
@@ -5,7 +20,7 @@ const App = {
     const user = Utils.getCurrentUser();
     if (user) {
       this.showAppLayout(user);
-      this.navigateTo('dashboard');
+      await this.navigateTo('dashboard');
     } else {
       this.showAuthLayout();
       Auth.showLogin();
@@ -31,18 +46,24 @@ const App = {
   },
 
   showAuthLayout() {
-    document.getElementById('auth-layout').style.display = 'flex';
-    document.getElementById('app-layout').style.display = 'none';
+    const authLayout = document.getElementById('auth-layout');
+    const appLayout = document.getElementById('app-layout');
+    if (authLayout) authLayout.style.cssText = 'display: flex !important;';
+    if (appLayout) appLayout.style.cssText = 'display: none !important;';
   },
 
   showAppLayout(user) {
-    document.getElementById('auth-layout').style.display = 'none';
-    document.getElementById('app-layout').style.display = 'grid';
+    const authLayout = document.getElementById('auth-layout');
+    const appLayout = document.getElementById('app-layout');
+    if (authLayout) authLayout.style.cssText = 'display: none !important;';
+    if (appLayout) appLayout.style.cssText = 'display: grid !important;';
     const displayName = Utils.getUserDisplayName(user);
     const userElem = document.getElementById('user-name');
     if (userElem) userElem.textContent = displayName;
     const avatarElem = document.getElementById('user-avatar');
     if (avatarElem) avatarElem.textContent = displayName.charAt(0).toUpperCase();
+
+    if (window.Dashboard) Dashboard.init();
   },
 
   async navigateTo(page) {
@@ -66,25 +87,30 @@ const App = {
     document.getElementById('page-title').textContent = titles[page] || page;
 
     try {
-      const response = await fetch(`pages/${page}.html`);
-      const html = await response.text();
+      let html = '';
+      if (window.api && window.api.loadTemplate) {
+        html = await window.api.loadTemplate(page);
+      } else {
+        const response = await fetch(`pages/${page}.html`);
+        html = await response.text();
+      }
       const pageContent = document.getElementById('page-content');
       pageContent.innerHTML = html;
 
       switch(page) {
-        case 'dashboard': if (window.Dashboard) Dashboard.init(); break;
-        case 'add-transaction': if (window.Transactions) Transactions.initAddForm(); break;
-        case 'transactions': if (window.Transactions) Transactions.init(); break;
-        case 'goals': if (window.Goals) Goals.init(); break;
-        case 'categories': if (window.Categories) Categories.init(); break;
-        case 'reports': if (window.Reports) Reports.init(); break;
-        case 'budget': if (window.Budget) Budget.init(); break;
-        case 'export': if (window.Export) Export.init(); break;
-        case 'settings': if (window.Settings) Settings.init(); break;
+        case 'dashboard': if (window.Dashboard) await Dashboard.init(); break;
+        case 'add-transaction': if (window.Transactions) await Transactions.initAddForm(); break;
+        case 'transactions': if (window.Transactions) await Transactions.init(); break;
+        case 'goals': if (window.Goals) await Goals.init(); break;
+        case 'categories': if (window.Categories) await Categories.init(); break;
+        case 'reports': if (window.Reports) await Reports.init(); break;
+        case 'budget': if (window.Budget) await Budget.init(); break;
+        case 'export': if (window.Export) await Export.init(); break;
+        case 'settings': if (window.Settings) await Settings.init(); break;
       }
     } catch (err) {
       console.error('Failed to load page:', err);
-      Toast.show('Failed to load page template', 'error');
+      Toast.show(`Failed to load page: ${err.message}`, 'error');
     }
   },
 
@@ -101,21 +127,10 @@ const App = {
   }
 };
 
-const Toast = {
-  show(message, type = 'info', duration = 3000) {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-      <span class="toast-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-      <span class="toast-message">${message}</span>
-    `;
-    container.appendChild(toast);
+window.App = App;
 
-    setTimeout(() => {
-      toast.remove();
-    }, duration);
-  }
-};
-
-document.addEventListener('DOMContentLoaded', () => App.init());
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => App.init());
+} else {
+  App.init();
+}

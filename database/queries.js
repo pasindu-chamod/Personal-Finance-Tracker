@@ -424,19 +424,23 @@ module.exports = {
   },
 
   async getCategoryBreakdown(db, { userId, startDate, endDate, type }) {
-    const query = `
-      SELECT c.id, c.name as categoryName, c.icon as categoryIcon, c.color as categoryColor, SUM(t.amount) as total
+    let query = `
+      SELECT c.id, COALESCE(c.name, 'General') as categoryName, COALESCE(c.icon, '💵') as categoryIcon, COALESCE(c.color, '#6366f1') as categoryColor, SUM(t.amount) as total
       FROM transactions t
-      JOIN categories c ON t.category_id = c.id
-      WHERE t.user_id = ? AND t.date >= ? AND t.date <= ? AND t.type = ?
-      GROUP BY c.id, c.name, c.icon, c.color
-      ORDER BY total DESC
+      LEFT JOIN categories c ON t.category_id = c.id
+      WHERE t.user_id = ?
     `;
+    const params = [userId];
+    if (type) { query += ` AND t.type = ?`; params.push(type); }
+    if (startDate) { query += ` AND t.date >= ?`; params.push(startDate); }
+    if (endDate) { query += ` AND t.date <= ?`; params.push(endDate); }
+    query += ` GROUP BY c.id, categoryName, categoryIcon, categoryColor ORDER BY total DESC`;
+
     if (getIsMysqlActive()) {
-      const [rows] = await getPool().execute(query, [userId, startDate, endDate, type]);
+      const [rows] = await getPool().execute(query, params);
       return rows;
     }
-    const result = db.exec(query, [userId, startDate, endDate, type]);
+    const result = db.exec(query, params);
     return resultToObjects(result);
   },
 

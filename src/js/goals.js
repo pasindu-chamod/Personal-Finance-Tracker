@@ -143,3 +143,5 @@ const Goals = {
     }
   }
 };
+
+window.Goals = Goals;

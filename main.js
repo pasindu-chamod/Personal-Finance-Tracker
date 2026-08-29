@@ -18,19 +18,18 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      webSecurity: false,
       preload: path.join(__dirname, 'preload.js')
     },
-    show: false,
-    ...(fs.existsSync(path.join(__dirname, 'src', 'assets', 'images', 'login_hero_bg.jpg')) ? {} : {})
+    show: true
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
-
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    console.log(`[RENDERER CONSOLE] ${message} (${sourceId}:${line})`);
   });
 
   mainWindow.setMenuBarVisibility(false);
+  mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
 }
 
 function setupIpcHandlers() {
@@ -55,15 +54,21 @@ function setupIpcHandlers() {
   ipcMain.handle('auth:login', async (event, { username, password }) => {
     try {
       const db = getDb();
+      console.log(`[auth:login] Attempting login for username: "${username}"`);
       const user = await queries.getUserByUsername(db, username);
-      if (!user) return null;
+      if (!user) {
+        console.log(`[auth:login] User "${username}" NOT found`);
+        return null;
+      }
       const isValid = bcrypt.compareSync(password, user.password);
+      console.log(`[auth:login] Password valid for "${username}":`, isValid);
       if (isValid) {
         delete user.password;
         return user;
       }
       return null;
     } catch (error) {
+      console.error('[auth:login] Error:', error);
       throw error;
     }
   });
@@ -103,8 +108,18 @@ function setupIpcHandlers() {
   ipcMain.handle('transactions:create', async (event, data) => {
     try {
       const db = getDb();
-      const result = await queries.createTransaction(db, data);
+      console.log('[transactions:create] Received data:', JSON.stringify(data));
+      const { userId, categoryId, type, amount, description, date } = data;
+      const result = await queries.createTransaction(db, {
+        userId: Number(userId),
+        categoryId: Number(categoryId),
+        type: String(type),
+        amount: Number(amount),
+        description: description || '',
+        date: String(date)
+      });
       saveDatabase();
+      console.log('[transactions:create] Saved with ID:', result);
       return result;
     } catch (error) {
       console.error('IPC transactions:create error:', error);
@@ -115,7 +130,8 @@ function setupIpcHandlers() {
   ipcMain.handle('transactions:getAll', async (event, { userId, filters }) => {
     try {
       const db = getDb();
-      return await queries.getTransactions(db, { userId, ...filters });
+      const safeFilters = filters || {};
+      return await queries.getTransactions(db, { userId: Number(userId), ...safeFilters });
     } catch (error) {
       console.error('IPC transactions:getAll error:', error);
       throw error;
@@ -159,7 +175,7 @@ function setupIpcHandlers() {
   ipcMain.handle('transactions:getSummary', async (event, { userId, month, year }) => {
     try {
       const db = getDb();
-      return await queries.getTransactionSummary(db, { userId, month, year });
+      return await queries.getTransactionSummary(db, { userId: Number(userId), month, year });
     } catch (error) {
       console.error('IPC transactions:getSummary error:', error);
       throw error;
@@ -402,6 +418,16 @@ function setupIpcHandlers() {
   ipcMain.handle('file:writeBuffer', async (event, { filePath, data }) => {
     await fsPromises.writeFile(filePath, Buffer.from(data));
     return true;
+  });
+
+  ipcMain.handle('app:loadTemplate', async (event, pageName) => {
+    try {
+      const pagePath = path.join(__dirname, 'src', 'pages', `${pageName}.html`);
+      return fs.readFileSync(pagePath, 'utf8');
+    } catch (err) {
+      console.error(`Failed to read template ${pageName}:`, err);
+      throw err;
+    }
   });
 }
 

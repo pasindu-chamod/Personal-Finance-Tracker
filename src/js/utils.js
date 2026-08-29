@@ -58,7 +58,17 @@ const Utils = {
   },
 
   setCurrentUser(user) {
+    if (user) {
+      const displayName = user.full_name || user.fullName || user.username || 'User';
+      user.full_name = displayName;
+      user.fullName = displayName;
+    }
     sessionStorage.setItem('currentUser', JSON.stringify(user));
+  },
+
+  getUserDisplayName(user) {
+    if (!user) return 'User';
+    return user.full_name || user.fullName || user.username || 'User';
   },
 
   clearCurrentUser() {

@@ -1,7 +1,10 @@
 const Goals = {
   async init() {
     await this.loadGoals();
-    document.getElementById('goal-form').addEventListener('submit', (e) => this.handleSave(e));
+    const form = document.getElementById('goal-form');
+    if (form) {
+      form.onsubmit = (e) => this.handleSave(e);
+    }
   },
 
   async loadGoals() {
@@ -22,7 +25,7 @@ const Goals = {
 
     const currency = Utils.getCurrency();
 
-    if (!goals || goals.length === 0) {
+    if (!Array.isArray(goals) || goals.length === 0) {
       list.innerHTML = `
         <div style="grid-column: span 3; text-align:center; padding:50px;" class="card">
           <div style="font-size:3rem; margin-bottom:12px;">🎯</div>
@@ -69,12 +72,12 @@ const Goals = {
 
   showAddModal() {
     document.getElementById('goal-modal-title').textContent = 'Create Savings Goal';
-    document.getElementById('goal-form').reset();
-    document.getElementById('goal-modal').classList.add('active');
+    document.getElementById('goal-form')?.reset();
+    document.getElementById('goal-modal')?.classList.add('active');
   },
 
   hideModal() {
-    document.getElementById('goal-modal').classList.remove('active');
+    document.getElementById('goal-modal')?.classList.remove('active');
   },
 
   async handleSave(e) {
@@ -82,10 +85,10 @@ const Goals = {
     const user = Utils.getCurrentUser();
     if (!user) return;
 
-    const title = document.getElementById('goal-title-input').value.trim();
-    const targetAmount = parseFloat(document.getElementById('goal-target-input').value);
-    const targetDate = document.getElementById('goal-date-input').value;
-    const savedAmount = parseFloat(document.getElementById('goal-initial-input').value) || 0;
+    const title = document.getElementById('goal-title-input')?.value.trim();
+    const targetAmount = parseFloat(document.getElementById('goal-target-input')?.value);
+    const targetDate = document.getElementById('goal-date-input')?.value;
+    const savedAmount = parseFloat(document.getElementById('goal-initial-input')?.value) || 0;
 
     if (!title || !targetAmount || !targetDate) {
       Toast.show('Please fill in required goal fields', 'error');
@@ -94,10 +97,10 @@ const Goals = {
 
     try {
       await window.api.goals.create({
-        userId: user.id,
+        userId: Number(user.id),
         title,
-        targetAmount,
-        savedAmount,
+        targetAmount: Number(targetAmount),
+        savedAmount: Number(savedAmount),
         targetDate,
         category: 'Target'
       });
@@ -119,7 +122,7 @@ const Goals = {
     }
 
     try {
-      await window.api.goals.updateSaved({ id: goalId, amount });
+      await window.api.goals.updateSaved({ id: Number(goalId), amount: Number(amount) });
       Toast.show('Deposit added to savings goal!', 'success');
       await this.loadGoals();
     } catch (err) {
@@ -132,7 +135,7 @@ const Goals = {
     if (!confirmed) return;
 
     try {
-      await window.api.goals.delete(goalId);
+      await window.api.goals.delete(Number(goalId));
       Toast.show('Savings goal deleted', 'success');
       await this.loadGoals();
     } catch (err) {

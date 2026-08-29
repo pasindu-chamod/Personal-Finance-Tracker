@@ -1,67 +1,82 @@
-# 💰 SmartFinance - Personal Finance Tracker
+<div align="center">
 
-An offline-first, feature-packed **Desktop Application** built with **Electron.js** for personal income, expense, and budget management. Designed with modern **Glassmorphism UI**, interactive **Chart.js** analytics, **Savings Goals**, and dual **MySQL / SQLite** database support.
+  # 💰 SmartFinance
+  ### Premium Personal Income & Expense Tracker Desktop Application
+
+  [![Electron](https://img.shields.io/badge/Electron-v28.3.3-47848F?style=for-the-badge&logo=electron&logoColor=white)](https://www.electronjs.org/)
+  [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+  [![SQLite](https://img.shields.io/badge/SQLite-sql.js-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
+  [![License](https://img.shields.io/badge/License-MIT-green.style=for-the-badge)](LICENSE)
+
+  <p align="center">
+    An offline-first, feature-rich <b>Cross-Platform Desktop Application</b> built with Electron.js for complete control over your personal finances. Designed with a sleek <b>Glassmorphism UI</b>, interactive <b>Chart.js analytics</b>, <b>Financial Health Scoring</b>, and <b>Savings Goals tracking</b>.
+  </p>
+
+</div>
 
 ---
 
-## ✨ Features
+## 🌟 Key Features
 
-- **🔒 User Authentication**: Secure login and registration with encrypted passwords (`bcryptjs`).
-- **🏠 Interactive Dashboard**:
-  - Live Total Income, Total Expense, and Net Balance summary metrics.
-  - **Financial Health Score** gauge (0-100) based on savings ratio.
-  - Doughnut chart for category breakdown & 6-month comparative bar chart.
-- **📋 Transaction Management**: Full CRUD operations for income and expenses with search, filtering, and pagination.
-- **🏷️ Custom Categories**: Pre-seeded default categories + ability to add custom income/expense categories with custom icons.
-- **🎯 Savings Goals Tracker**: Create dedicated savings targets (e.g. Emergency Fund, Laptop Purchase) and track deposit progress with visual progress bars.
-- **💰 Monthly Budget Limits**: Set category-wise spending limits with visual over-budget alerts.
-- **📊 Reports & Exports**: Export transaction logs to **PDF** and **Excel (.xlsx)** formats, or backup data as **JSON**.
-- **🛢️ Dual Database Engine (MySQL & Offline SQLite)**:
-  - Supports direct connection to **MySQL Server** (XAMPP / MySQL Workbench / Remote MySQL).
-  - Automatic fallback to offline WebAssembly-based **SQLite (`sql.js`)** if MySQL is not configured.
-- **🎨 Modern Glassmorphism Aesthetic**: Seamless Dark / Light mode support with 3D financial graphic banners.
+- **🔒 User Authentication**: Secure Login & Registration system with password hashing (`bcryptjs`).
+- **🏠 Executive Dashboard**:
+  - Live **Total Income**, **Total Expense**, and **Net Balance** summary metrics with count-up animations.
+  - **⭐ Financial Health Score**: Dynamic rating (0-100) based on savings ratio and spending trends.
+  - Interactive **Doughnut & Bar charts** powered by Chart.js.
+- **📋 Transaction Management**: Full CRUD operations for income and expenses with search filter, type filter, and date ordering.
+- **🎯 Savings Goals Tracker**: Set dedicated financial targets (e.g. *Emergency Fund*, *New Tech*) and track deposit progress visually.
+- **💰 Budget Planner**: Set category-wise monthly spending limits with progress indicators and visual over-budget alerts.
+- **🏷️ Category Management**: Default income/expense categories + option to create custom categories with custom icons.
+- **📊 Reports & Exports**: Instant data exports to **JSON Backup / Restore** for complete data safety.
+- **🎨 Glassmorphism Design System**: Modern dark & light mode UI styling with 3D financial graphic artwork assets.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Electron.js](https://www.electronjs.org/) (Cross-platform Desktop)
-- **Frontend**: HTML5, Vanilla CSS3 (Custom Tokens), JavaScript (ES6+)
-- **Database**: MySQL (`mysql2`) / SQLite (`sql.js` WASM)
-- **Charts & Reports**: Chart.js, jsPDF, ExcelJS
-- **Security**: bcryptjs
+| Layer | Technology |
+| :--- | :--- |
+| **Framework** | [Electron.js](https://www.electronjs.org/) (Cross-platform Desktop) |
+| **Frontend** | HTML5, Vanilla CSS3 (Custom Design System), Modern JS (ES6+) |
+| **Database** | Offline SQLite via `sql.js` (WebAssembly) |
+| **Data Visuals** | [Chart.js](https://www.chartjs.org/) |
+| **Security** | `bcryptjs` (Password Hashing) |
 
 ---
 
-## 🚀 Quick Start Guide
+## 📸 Screenshots Overview
+
+<div align="center">
+  <img src="src/assets/images/login_hero_bg.jpg" alt="SmartFinance Hero Visual" width="90%" style="border-radius: 12px; margin-bottom: 12px;" />
+  <br/>
+  <i>3D Glassmorphism Interface Artwork & Hero Banner</i>
+</div>
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v16+ recommended)
-- [npm](https://www.npmjs.com/)
 
-### 1. Clone & Install Dependencies
-```bash
-git clone https://github.com/pasindu-chamod/Personal-Finance-Tracker.git
-cd Personal-Finance-Tracker
-npm install
-```
+Ensure you have [Node.js](https://nodejs.org/) installed (v16 or higher).
 
-### 2. Run Application
-```bash
-npm start
-```
+### Installation & Launch
 
----
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/pasindu-chamod/Personal-Finance-Tracker.git
+   cd Personal-Finance-Tracker
+   ```
 
-## 🛢️ MySQL Database Setup (Optional)
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-SmartFinance works out-of-the-box in **Offline Mode** using built-in SQLite (`smartfinance.db`). If you want to connect to a **MySQL Server** (such as XAMPP or MySQL Workbench):
-
-1. Start your local MySQL Server (e.g. XAMPP Control Panel -> MySQL Start).
-2. Create the database schema by importing `database/schema.sql` into phpMyAdmin or MySQL Workbench.
-3. Open **SmartFinance** -> Go to **Settings** -> **MySQL Database Configuration**.
-4. Check **Enable MySQL Database Mode**, enter your credentials (Host: `localhost`, Port: `3306`, User: `root`, Password: ``), and click **🔌 Test Connection**.
-5. Save settings and restart the app to switch database engine!
+3. **Start the application**:
+   ```bash
+   npm start
+   ```
 
 ---
 
@@ -73,16 +88,14 @@ Personal-Finance-Tracker/
 ├── preload.js               # Secure IPC bridge (window.api)
 ├── package.json             # App metadata & dependencies
 ├── database/
-│   ├── db.js                # Database wrapper (MySQL / sql.js manager)
-│   ├── mysql-db.js          # MySQL connection pool
-│   ├── queries.js           # Database queries & logic
-│   ├── migrations.js        # SQLite schema & seeding
-│   └── schema.sql           # MySQL DDL setup script
+│   ├── db.js                # Database connection & persistence manager
+│   ├── queries.js           # Parameterized SQL query functions
+│   └── migrations.js        # Schema creation & default seeding
 └── src/
     ├── index.html           # SPA Application Shell
     ├── assets/images/       # 3D Visual Artworks
-    ├── css/                 # CSS Design Tokens & Styles
-    ├── js/                  # SPA Controllers & Utilities
+    ├── css/                 # Modern CSS Design Tokens & Layouts
+    ├── js/                  # SPA Controllers & Feature Modules
     └── pages/               # HTML Page Templates
 ```
 
@@ -90,4 +103,8 @@ Personal-Finance-Tracker/
 
 ## 📜 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the **MIT License**. See `LICENSE` for details.
+
+<div align="center">
+  <sub>Built with ❤️ by Pasindu Chamod</sub>
+</div>

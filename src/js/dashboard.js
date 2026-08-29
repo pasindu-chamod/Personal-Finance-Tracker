@@ -4,12 +4,16 @@ const Dashboard = {
 
   async init() {
     const user = Utils.getCurrentUser();
-    if (!user) return;
-
-    document.getElementById('dash-user-name').textContent = user.full_name || user.username;
+    const displayName = Utils.getUserDisplayName(user);
+    const dashUserElem = document.getElementById('dash-user-name');
+    if (dashUserElem) {
+      dashUserElem.textContent = displayName;
+    }
 
     const now = new Date();
-    await this.loadData(user.id, now.getMonth() + 1, now.getFullYear());
+    if (user) {
+      await this.loadData(user.id, now.getMonth() + 1, now.getFullYear());
+    }
   },
 
   async loadData(userId, month, year) {
